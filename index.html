@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizador de Arquivos Inteligente</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --card-bg: rgba(20, 26, 44, 0.6);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --text-color: #f3f4f6;
+            --text-muted: #9ca3af;
+            --primary: #4f46e5;
+            --primary-glow: rgba(79, 70, 229, 0.4);
+            --accent: #10b981;
+            --danger: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(79, 70, 229, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #fff 0%, var(--text-muted) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: span 2;
+        }
+
+        @media (max-width: 768px) {
+            .form-group.full-width {
+                grid-column: span 1;
+            }
+        }
+
+        label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        input[type="text"], input[type="number"], select {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.8rem 1rem;
+            color: #fff;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus, input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        button {
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .options-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1.5rem;
+        }
+
+        .switch-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 24px;
+            border: 1px solid var(--border-color);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: var(--primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
+        .switch-label {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            width: 100%;
+            box-shadow: 0 4px 14px var(--primary-glow);
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px var(--primary-glow);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            background: #3730a3;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Progress Section */
+        .progress-container {
+            display: none;
+            margin-top: 2rem;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-title {
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+
+        .progress-bar-bg {
+            background: rgba(255, 255, 255, 0.06);
+            height: 10px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar-fill {
+            background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 100%);
+            width: 0%;
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 5px;
+        }
+
+        /* Console Section */
+        .console-container {
+            display: none;
+            margin-top: 1.5rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            background: #05070c;
+            overflow: hidden;
+        }
+
+        .console-header {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 0.75rem 1.2rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .console-body {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            padding: 1.2rem;
+            height: 250px;
+            overflow-y: auto;
+            color: #d1d5db;
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+
+        .log-simulacao { color: #f59e0b; }
+        .log-copiando { color: #3b82f6; }
+        .log-movendo { color: #8b5cf6; }
+        .log-erro { color: var(--danger); }
+        .log-sucesso { color: var(--accent); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Organizador de Arquivos</h1>
+            <p>Organize fotos, vídeos e áudios com geolocalização e inteligência local do macOS</p>
+        </header>
+
+        <form id="organizer-form" onsubmit="startOrganization(event)">
+            <div class="grid">
+                <div class="form-group full-width">
+                    <label>Pasta de Origem</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="src-path" placeholder="Selecione a pasta com os arquivos originais..." required>
+                        <button type="button" class="btn-secondary" onclick="selectFolder('src-path')">Selecionar</button>
+                    </div>
+                </div>
+
+                <div class="form-group full-width">
+                    <label>Pasta de Destino</label>
+                    <div class="input-wrapper">
+                        <input type="text" id="dest-path" placeholder="Selecione a pasta onde os arquivos organizados serão salvos..." required>
+                        <button type="button" class="btn-secondary" onclick="selectFolder('dest-path')">Selecionar</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Estrutura de Pastas</label>
+                    <select id="folder-format">
+                        <option value="{country}/{year}/{ai_tag}">{País}/{Ano}/{Descrição}</option>
+                        <option value="{country}/{year}">{País}/{Ano}</option>
+                        <option value="{year}/{month}">{Ano}/{Mês}</option>
+                        <option value="{year}">{Ano}</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Ação dos Arquivos</label>
+                    <select id="action">
+                        <option value="copy">Copiar Arquivos (Recomendado)</option>
+                        <option value="move">Mover Arquivos</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Limitar Arquivos (Opcional)</label>
+                    <input type="number" id="limit" placeholder="Ex: 50 (Vazio para todos)">
+                </div>
+
+                <div class="form-group">
+                    <label>Formato do Nome</label>
+                    <input type="text" id="file-format" value="{original_name}" placeholder="Ex: {ai_tag}_{original_name}">
+                </div>
+            </div>
+
+            <div class="options-row">
+                <label class="switch-group">
+                    <span class="switch">
+                        <input type="checkbox" id="ai-rename" checked>
+                        <span class="slider"></span>
+                    </span>
+                    <span class="switch-label">Classificação Inteligente (IA)</span>
+                </label>
+
+                <label class="switch-group">
+                    <span class="switch">
+                        <input type="checkbox" id="dry-run" checked>
+                        <span class="slider"></span>
+                    </span>
+                    <span class="switch-label">Modo Simulação (Dry-Run)</span>
+                </label>
+            </div>
+
+            <button type="submit" id="submit-btn" class="btn-primary">Iniciar Organização</button>
+        </form>
+
+        <!-- Progress Section -->
+        <div id="progress-section" class="progress-container">
+            <div class="progress-info">
+                <span class="progress-title" id="progress-status">Preparando...</span>
+                <span class="progress-title" id="progress-percent">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div id="progress-bar" class="progress-bar-fill"></div>
+            </div>
+            <div class="progress-info" style="margin-bottom: 0;">
+                <span id="progress-details" style="font-size: 0.9rem; color: var(--text-muted);">0 / 0 arquivos</span>
+            </div>
+        </div>
+
+        <!-- Console Section -->
+        <div id="console-section" class="console-container">
+            <div class="console-header">
+                <span>Console de Execução</span>
+                <span onclick="clearConsole()" style="cursor: pointer; hover: text-white;">Limpar</span>
+            </div>
+            <div id="console-body" class="console-body"></div>
+        </div>
+    </div>
+
+    <script>
+        let eventSource = null;
+
+        async function selectFolder(targetId) {
+            try {
+                const response = await fetch('/api/select-folder', { method: 'POST' });
+                const data = await response.json();
+                if (data.path) {
+                    document.getElementById(targetId).value = data.path;
+                }
+            } catch (error) {
+                console.error("Erro ao selecionar pasta:", error);
+            }
+        }
+
+        function clearConsole() {
+            document.getElementById('console-body').innerHTML = '';
+        }
+
+        function appendLog(message) {
+            const consoleBody = document.getElementById('console-body');
+            const isScrolledToBottom = consoleBody.scrollHeight - consoleBody.clientHeight <= consoleBody.scrollTop + 50;
+            
+            let className = '';
+            let formattedMessage = message;
+
+            if (message.includes('[Simulação]')) {
+                className = 'log-simulacao';
+            } else if (message.includes('Copiando')) {
+                className = 'log-copiando';
+            } else if (message.includes('Movendo')) {
+                className = 'log-movendo';
+            } else if (message.includes('Erro') || message.includes('erro') || message.includes('[ERROR]')) {
+                className = 'log-erro';
+            } else if (message.includes('Concluída') || message.includes('sucesso')) {
+                className = 'log-sucesso';
+            }
+
+            const span = document.createElement('span');
+            span.className = className;
+            span.textContent = formattedMessage + '\n';
+            consoleBody.appendChild(span);
+
+            if (isScrolledToBottom) {
+                consoleBody.scrollTop = consoleBody.scrollHeight;
+            }
+        }
+
+        async function startOrganization(event) {
+            event.preventDefault();
+
+            // Clear previous UI states
+            clearConsole();
+            document.getElementById('progress-section').style.display = 'block';
+            document.getElementById('console-section').style.display = 'block';
+            document.getElementById('progress-bar').style.width = '0%';
+            document.getElementById('progress-percent').innerText = '0%';
+            document.getElementById('progress-status').innerText = 'Iniciando...';
+            document.getElementById('progress-details').innerText = '';
+            document.getElementById('submit-btn').disabled = true;
+
+            const payload = {
+                src: document.getElementById('src-path').value,
+                dest: document.getElementById('dest-path').value,
+                folder_format: document.getElementById('folder-format').value,
+                file_format: document.getElementById('file-format').value,
+                action: document.getElementById('action').value,
+                ai_rename: document.getElementById('ai-rename').checked,
+                dry_run: document.getElementById('dry-run').checked,
+                limit: document.getElementById('limit').value ? parseInt(document.getElementById('limit').value) : null
+            };
+
+            // Setup SSE event listener before launching
+            if (eventSource) {
+                eventSource.close();
+            }
+            
+            eventSource = new EventSource('/api/events');
+
+            eventSource.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                
+                if (data.type === 'log') {
+                    appendLog(data.message);
+                } else if (data.type === 'progress') {
+                    const current = data.current;
+                    const total = data.total;
+                    const percent = data.percent;
+                    
+                    document.getElementById('progress-bar').style.width = `${percent}%`;
+                    document.getElementById('progress-percent').innerText = `${percent.toFixed(1)}%`;
+                    document.getElementById('progress-details').innerText = `${current} / ${total} arquivos`;
+                    document.getElementById('progress-status').innerText = 'Processando...';
+                } else if (data.type === 'done') {
+                    document.getElementById('progress-status').innerText = 'Concluído!';
+                    document.getElementById('submit-btn').disabled = false;
+                    eventSource.close();
+                } else if (data.type === 'error') {
+                    appendLog(`[ERROR] ${data.message}`);
+                    document.getElementById('progress-status').innerText = 'Erro na Execução';
+                    document.getElementById('submit-btn').disabled = false;
+                    eventSource.close();
+                }
+            };
+
+            // Trigger the run
+            try {
+                const response = await fetch('/api/run', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                if (!response.ok) {
+                    const errData = await response.json();
+                    appendLog(`[ERROR] Falha ao iniciar: ${errData.error}`);
+                    document.getElementById('submit-btn').disabled = false;
+                }
+            } catch (error) {
+                appendLog(`[ERROR] Erro na rede: ${error.message}`);
+                document.getElementById('submit-btn').disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

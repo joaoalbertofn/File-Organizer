@@ -1,0 +1,35 @@
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# OS Files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Compiled Binaries and Libraries
+organizer/mac_tagger
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Databases & Caching
+*.db
+*.sqlite
+
+# Logs
+*.log
+
+# Credentials
+organizer_credentials.json
